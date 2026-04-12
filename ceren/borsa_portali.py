@@ -20,12 +20,12 @@ def giris_kontrol():
             kullanici = st.text_input("Kullanıcı Adı:")
             sifre = st.text_input("Şifre:", type="password")
             if st.button("Dükkanı Aç 🔑"):
-                # BURADAN ŞİFREYİ DEĞİŞTİREBİLİRSİN USTA
+                # ŞİFRE AYARI
                 if kullanici == "usta" and sifre == "usta123":
                     st.session_state["giris_basarili"] = True
                     st.rerun()
                 else:
-                    st.error("❌ Yetkisiz Giriş! Şanzımanı dağıtma, şifreyi doğru gir.")
+                    st.error("❌ Yetkisiz Giriş! Şifreyi doğru gir usta.")
         return False
     return True
 
@@ -42,5 +42,20 @@ def terminal_calistir(func, input_val):
 
 # --- ANA SİSTEM BAŞLIYOR ---
 if giris_kontrol():
+    # BURADA SÖZÜ EDİLEN HATA DÜZELTİLDİ:
+    if st.sidebar.button("Güvenli Çıkış"):
+        st.session_state["giris_basarili"] = False
+        st.rerun()
+
     st.sidebar.success("✅ Yetki Onaylandı. Hoş geldin Usta!")
-    if st.sidebar
+    st.title("🛰️ USTA BORSA PUSULASI: ÖZEL PANEL v15.6")
+    st.write("---")
+
+    tab1, tab2, tab3 = st.tabs(["🚀 v12.7 DİNAMİK LİSTE", "🎯 v12.5 AL-SAT SİNYAL", "⚠️ v12.0 GÜVENLİK SENSÖRÜ"])
+
+    # --- SEKME 1: v12.7 DİNAMİK LİSTE ---
+    with tab1:
+        st.header("v12.7: 'OTOMATİK GARAJ'")
+        girdi_127 = st.text_input("🔍 Taranacak Hisseler (Örn: ASTOR, THYAO, SASA):", "THYAO, SASA, ASTOR", key="k127")
+        if st.button("LİSTEYİ TARAMAYA BAŞLA 📡"):
+            def borsa_
