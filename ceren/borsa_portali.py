@@ -21,7 +21,7 @@ def giris_kontrol():
             sifre = st.text_input("Şifre:", type="password")
             if st.button("Dükkanı Aç 🔑"):
                 # ŞİFRE AYARI
-                if kullanici == "usta" and (sifre == "usta123" or sifre == "Usta123"):
+                if kullanici == "pusula1" and (sifre == "usta123" or sifre == "pusula123"):
                     st.session_state["giris_basarili"] = True
                     st.rerun()
                 else:
