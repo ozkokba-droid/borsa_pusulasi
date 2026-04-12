@@ -19,7 +19,7 @@ if not st.session_state["giris_basarili"]:
         kullanici = st.text_input("Kullanıcı Adı:")
         sifre = st.text_input("Şifre:", type="password")
         if st.button("Dükkanı Aç 🔑"):
-            if kullanici == "usta" and (sifre == "usta123" or sifre == "Usta123"):
+            if kullanici == "usta" and (sifre == "pusula123" or sifre == "PUSULA1"):
                 st.session_state["giris_basarili"] = True
                 st.rerun()
             else:
