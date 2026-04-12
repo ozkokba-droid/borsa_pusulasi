@@ -20,8 +20,8 @@ def giris_kontrol():
             kullanici = st.text_input("Kullanıcı Adı:")
             sifre = st.text_input("Şifre:", type="password")
             if st.button("Dükkanı Aç 🔑"):
-                # ŞİFRE AYARI
-                if kullanici == "usta" and sifre == "usta123":
+                # ŞİFRE AYARI (İstersen usta123'ü değiştirebilirsin)
+                if kullanici == "usta" and (sifre == "usta123" or sifre == "Usta123"):
                     st.session_state["giris_basarili"] = True
                     st.rerun()
                 else:
@@ -42,7 +42,7 @@ def terminal_calistir(func, input_val):
 
 # --- ANA SİSTEM BAŞLIYOR ---
 if giris_kontrol():
-    # BURADA SÖZÜ EDİLEN HATA DÜZELTİLDİ:
+    # Sidebar Ayarları
     if st.sidebar.button("Güvenli Çıkış"):
         st.session_state["giris_basarili"] = False
         st.rerun()
@@ -58,4 +58,6 @@ if giris_kontrol():
         st.header("v12.7: 'OTOMATİK GARAJ'")
         girdi_127 = st.text_input("🔍 Taranacak Hisseler (Örn: ASTOR, THYAO, SASA):", "THYAO, SASA, ASTOR", key="k127")
         if st.button("LİSTEYİ TARAMAYA BAŞLA 📡"):
-            def borsa_
+            def borsa_pusulasi_v12_7_dinamik_liste():
+                print("\n" + "="*75)
+                print(" 🎯 v12.7: 'OTOMATİK GARAJ' - DİNAMİK LİSTE TARAMA MOD
