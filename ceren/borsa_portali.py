@@ -114,3 +114,32 @@ with tab3:
             print(f"📏 Destekle Mesafe: %{(((fiyat - e20) / e20) * 100):.2f}")
 
         st.code(terminal_calistir(pusula_pro_v12_0_guvenlik, hisse_120), language='text')
+        import streamlit as st
+# ... diğer kütüphaneler (yf, pd vs.) aynı kalacak ...
+
+# --- GÜVENLİK KİLİDİ ---
+def giris_kontrol():
+    if "giris_basarili" not in st.session_state:
+        st.session_state["giris_basarili"] = False
+
+    if not st.session_state["giris_basarili"]:
+        st.title("🛡️ USTA TERMİNALİ - GÜVENLİ GİRİŞ")
+        kullanici = st.text_input("Kullanıcı Adı:")
+        sifre = st.text_input("Şifre:", type="password")
+        
+        if st.button("Dükkanı Aç"):
+            # BURADAN KENDİ ŞİFRENİ AYARLAYABİLİRSİN USTA
+            if kullanici == "usta" and sifre == "usta123":
+                st.session_state["giris_basarili"] = True
+                st.rerun()
+            else:
+                st.error("❌ Yetkisiz Giriş! Şifreyi yanlış girdin usta.")
+        return False
+    return True
+
+# --- ANA SİSTEM ---
+if giris_kontrol():
+    # BURADAN SONRASI SENİN ESKİ KODLARININ TAMAMI (Tablar, Modüller vs.)
+    st.sidebar.success("✅ Yetki Onaylandı. Hoş geldin Usta!")
+    
+    # ... (Buraya tab1, tab2, tab3 ve o uzun fonksiyonlar gelecek)
