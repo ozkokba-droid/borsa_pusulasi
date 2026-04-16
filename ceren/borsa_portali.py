@@ -19,24 +19,28 @@ if not st.session_state["giris_basarili"]:
         kullanici = st.text_input("Kullanıcı Adı:")
         sifre = st.text_input("Şifre:", type="password")
         if st.button("Dükkanı Aç 🔑"):
-            if kullanici == "pusula123" and (sifre == "PUSULA1" or sifre == "PUSULA1"):
+            if kullanici == "usta" and (sifre == "usta123" or sifre == "Usta123"):
                 st.session_state["giris_basarili"] = True
                 st.rerun()
             else:
                 st.error("❌ Yetkisiz Giriş! Şifreyi doğru gir usta.")
 else:
-    # --- BURASI KİLİDİN İÇİ: GİRİŞ YAPILINCA BURASI ÇALIŞIR ---
+    # --- BURASI ANA PANEL ---
     if st.sidebar.button("Güvenli Çıkış"):
         st.session_state["giris_basarili"] = False
         st.rerun()
 
     st.sidebar.success("✅ Yetki Onaylandı. Hoş geldin Usta!")
-    st.title("🛰️ USTA BORSA PUSULASI: ÖZEL PANEL v15.7")
+    st.title("🛰️ USTA BORSA PUSULASI: ÖZEL PANEL v16.0")
     st.write("---")
 
-    tab1, tab2, tab3 = st.tabs(["🚀 v12.7 DİNAMİK LİSTE", "🎯 v12.5 AL-SAT SİNYAL", "⚠️ v12.0 GÜVENLİK SENSÖRÜ"])
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "🚀 v12.7 DİNAMİK LİSTE", 
+        "🎯 v12.5 AL-SAT SİNYAL", 
+        "⚠️ v12.0 GÜVENLİK SENSÖRÜ",
+        "⚖️ v16.0 ROD-BALANS (D/D)"
+    ])
 
-    # YARDIMCI TERMİNAL FONKSİYONU (KİLİDİN İÇİNDE)
     def terminal_calistir(func, input_val):
         f = io.StringIO()
         import builtins
@@ -47,10 +51,10 @@ else:
         builtins.input = original_input
         return f.getvalue()
 
-    # --- SEKME 1 ---
+    # --- SEKME 1: v12.7 ---
     with tab1:
         st.header("v12.7: 'OTOMATİK GARAJ'")
-        girdi_127 = st.text_input("🔍 Taranacak Hisseler:", "THYAO, SASA, ASTOR", key="k127")
+        girdi_127 = st.text_input("🔍 Taranacak Hisseler:", "THYAO, SASA, ASTOR, FROTO", key="k127")
         if st.button("LİSTEYİ TARAMAYA BAŞLA 📡"):
             def func_127():
                 print("\n" + "="*75 + "\n 🎯 v12.7: DİNAMİK LİSTE TARAMA \n" + "="*75)
@@ -61,18 +65,17 @@ else:
                         h_kod = sembol + ".IS" if "." not in sembol else sembol
                         d = yf.download(h_kod, period="1mo", progress=False)
                         if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
-                        f = d['Close'].iloc[-1]
-                        e20 = d['Close'].ewm(span=20).mean().iloc[-1]
+                        f = d['Close'].iloc[-1]; e20 = d['Close'].ewm(span=20).mean().iloc[-1]
                         h_gucu = (d['Volume'].iloc[-1] / d['Volume'].tail(10).mean()) * 100
                         durum = "🟢 GÜÇLÜ AL" if f > e20 and h_gucu > 120 else "🔴 BEKLE"
                         print(f"{sembol:<10} | {f:>8.2f} | %{h_gucu:>8.0f} | {durum}")
                     except: continue
             st.code(terminal_calistir(func_127, girdi_127), language='text')
 
-    # --- SEKME 2 ---
+    # --- SEKME 2: v12.5 ---
     with tab2:
         st.header("v12.5: AL-SAT SİNYAL ONAY")
-        hisse_125 = st.text_input("Hisse Kodu:", "TOASO", key="k125")
+        hisse_125 = st.text_input("Hisse Kodu:", "FROTO", key="k125")
         if st.button("SİNYAL ONAYI AL 🎯"):
             def func_125():
                 h = hisse_125 + ".IS" if "." not in hisse_125 else hisse_125
@@ -87,7 +90,7 @@ else:
                 fig, _ = mpf.plot(st.session_state['d125'].tail(60), type='candle', style='charles', returnfig=True)
                 st.pyplot(fig)
 
-    # --- SEKME 3 ---
+    # --- SEKME 3: v12.0 ---
     with tab3:
         st.header("v12.0: GÜVENLİK SENSÖRÜ")
         hisse_120 = st.text_input("Hisse Kodu:", "ASELS", key="k120")
@@ -99,3 +102,33 @@ else:
                 f = d['Close'].iloc[-1]; e20 = d['Close'].ewm(span=20).mean().iloc[-1]
                 print(f"📊 {h} RAPORU\nDurum: {'✅ GÜVENLİ' if f > e20 else '🚨 RİSKLİ'}\nMesafe: %{((f-e20)/e20*100):.2f}")
             st.code(terminal_calistir(func_120, hisse_120), language='text')
+
+    # --- SEKME 4: v16.0 ROD-BALANS (DESTEK/DİRENÇ) ---
+    with tab4:
+        st.header("v16.0: DESTEK & DİRENÇ ANALİZİ")
+        hisse_160 = st.text_input("Analiz Edilecek Makine (Örn: THYAO):", "THYAO", key="k160")
+        if st.button("SEVİYELERİ HESAPLA ⚖️"):
+            def func_160():
+                h = hisse_160 + ".IS" if "." not in hisse_160 else hisse_160
+                d = yf.download(h, period="5d", interval="1d", progress=False)
+                if len(d) < 2: 
+                    print("❌ Veri eksik!")
+                    return
+                if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
+                last_day = d.iloc[-2] # Bir önceki tam kapanış
+                y, du, k = last_day['High'], last_day['Low'], last_day['Close']
+                p = (y + du + k) / 3
+                r1, s1 = (2 * p) - du, (2 * p) - y
+                r2, s2 = p + (y - du), p - (y - du)
+                
+                print(f"📊 {h} İÇİN ROD-BALANS AYARI:\n" + "-"*45)
+                print(f"🚀 Direnç 2 (Tavan):     {r2:>8.2f}")
+                print(f"📈 Direnç 1 (Üst Eşik):  {r1:>8.2f}")
+                print(f"⚖️ PİVOT (Rölanti):      {p:>8.2f}")
+                print(f"📉 Destek 1 (Kriko):     {s1:>8.2f}")
+                print(f"🚨 Destek 2 (Dip):       {s2:>8.2f}")
+                print("-" * 45)
+                print("💡 Usta Notu: Pivot üstündeysen gazla, altındaysan vitesi boşa al!")
+            st.code(terminal_calistir(func_120, hisse_160), language='text')
+            # func_120 yazmışım, hemen func_160 yapalım:
+            st.code(terminal_calistir(func_160, hisse_160), language='text')
