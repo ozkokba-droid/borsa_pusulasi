@@ -28,7 +28,7 @@ else:
         st.session_state["giris_basarili"] = False
         st.rerun()
 
-    st.title("🛰️ USTA BORSA PUSULASI v17.2")
+    st.title("🛰️ USTA BORSA PUSULASI v17.3")
     st.write("---")
 
     tabs = st.tabs(["🚀 v12.7 LİSTE", "🎯 v12.5 SİNYAL", "⚠️ v12.0 GÜVENLİK", "⚖️ v16.0 ROD-BALANS"])
@@ -44,8 +44,8 @@ else:
                 df = yf.download(h_kod, period="5d", progress=False)
                 if not df.empty:
                     if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
-                    fiyat = float(df['Close'].iloc[-1])
-                    st.success(f"✅ {s}: {fiyat:.2f} TL")
+                    fiyat_degeri = float(df['Close'].iloc[-1])
+                    st.success(f"✅ {s}: {fiyat_degeri:.2f} TL")
 
     # --- TAB 2: AL-SAT SİNYAL ---
     with tabs[1]:
@@ -60,8 +60,8 @@ else:
                 gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
                 loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
                 rs = gain / loss
-                rsi = 100 - (100 / (1 + rs)).iloc[-1]
-                st.info(f"📊 {h} RSI Değeri: {float(rsi):.2f}")
+                rsi_degeri = 100 - (100 / (1 + rs)).iloc[-1]
+                st.info(f"📊 {h} RSI Değeri: {float(rsi_degeri):.2f}")
                 fig, _ = mpf.plot(df.tail(60), type='candle', style='charles', returnfig=True)
                 st.pyplot(fig)
 
@@ -74,4 +74,5 @@ else:
             df = yf.download(h, period="1y", progress=False)
             if not df.empty:
                 if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
-                f
+                fiyat_güncel
+            
