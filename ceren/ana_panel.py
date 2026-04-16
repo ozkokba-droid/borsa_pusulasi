@@ -1,18 +1,18 @@
 import streamlit as st
-import importlib.util
 import os
 
 # --- SAYFA AYARLARI ---
 st.set_page_config(page_title="Usta Borsa Pusulası Pro", layout="wide")
 
+# Bulunduğumuz dizini alıyoruz
 su_anki_dizin = os.path.dirname(os.path.abspath(__file__))
 
 def modulu_calistir(hedef_dosya_adi):
-    """Dosya ismini büyük/küçük harf bakmaksızın bulur ve çalıştırır."""
+    """Dosyayı bulur ve doğrudan Python içinde çalıştırır."""
     butun_dosyalar = os.listdir(su_anki_dizin)
     gercek_dosya_adi = None
     
-    # Akıllı eşleştirme: Dosya ismini büyük/küçük harf duyarsız kontrol et
+    # Harf duyarsız dosya arama
     for dosya in butun_dosyalar:
         if dosya.lower() == hedef_dosya_adi.lower():
             gercek_dosya_adi = dosya
@@ -21,15 +21,16 @@ def modulu_calistir(hedef_dosya_adi):
     if gercek_dosya_adi:
         yol = os.path.join(su_anki_dizin, gercek_dosya_adi)
         try:
-            spec = importlib.util.spec_from_file_location("modul", yol)
-            modul = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(modul)
+            # DİREKT ÇALIŞTIRMA YÖNTEMİ (Daha Sağlam)
+            with open(yol, "r", encoding="utf-8") as f:
+                kod = f.read()
+                exec(kod, globals()) # Dosyayı ana bellek üzerinde çalıştırır
         except Exception as e:
             st.error(f"⚠️ Modül çalışırken hata verdi: {e}")
     else:
-        st.error(f"❌ '{hedef_dosya_adi}' bulunamadı usta!\n\nKlasördeki dosyalar: {butun_dosyalar}")
+        st.error(f"❌ '{hedef_dosya_adi}' bulunamadı usta!")
 
-st.title("🛰️ USTA BORSA PUSULASI PANELİ v19.0")
+st.title("🛰️ USTA BORSA PUSULASI PANELİ v19.1")
 st.write("---")
 
 tabs = st.tabs(["⚠️ v12.0 GÜVENLİK", "🎯 v12.5 AL-SAT", "🚀 v12.7 LİSTE", "💰 KÂR-ZARAR", "⚖️ ROD-BALANS"])
@@ -51,4 +52,4 @@ with tabs[3]:
 
 with tabs[4]:
     if st.button("Rod-Balans Ayarını Başlat"):
-        modulu_calistir("KISAORTAUZUNKONTROL.PY") # .PY veya .py fark etmez artık!
+        modulu_calistir("KISAORTAUZUNKONTROL.PY")
