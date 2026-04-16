@@ -28,7 +28,7 @@ else:
         st.session_state["giris_basarili"] = False
         st.rerun()
 
-    st.title("🛰️ USTA BORSA PUSULASI v17.3")
+    st.title("🛰️ USTA BORSA PUSULASI v17.4")
     st.write("---")
 
     tabs = st.tabs(["🚀 v12.7 LİSTE", "🎯 v12.5 SİNYAL", "⚠️ v12.0 GÜVENLİK", "⚖️ v16.0 ROD-BALANS"])
@@ -36,7 +36,7 @@ else:
     # --- TAB 1: DİNAMİK LİSTE ---
     with tabs[0]:
         st.subheader("Dinamik Liste Tarama")
-        girdi = st.text_input("Hisseler (Örn: THYAO, SASA):", "THYAO, SASA, FROTO", key="in127")
+        girdi = st.text_input("Hisseler (Örn: THYAO, SASA, BIGEN):", "BIGEN, THYAO, SASA", key="in127")
         if st.button("LİSTEYİ TARAMAYA BAŞLA 📡", key="btn127"):
             hisseler = [h.strip().upper() for h in girdi.split(",") if h.strip()]
             for s in hisseler:
@@ -44,8 +44,8 @@ else:
                 df = yf.download(h_kod, period="5d", progress=False)
                 if not df.empty:
                     if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
-                    fiyat_degeri = float(df['Close'].iloc[-1])
-                    st.success(f"✅ {s}: {fiyat_degeri:.2f} TL")
+                    fiyat_son = float(df['Close'].iloc[-1])
+                    st.success(f"✅ {s}: {fiyat_son:.2f} TL")
 
     # --- TAB 2: AL-SAT SİNYAL ---
     with tabs[1]:
@@ -59,9 +59,8 @@ else:
                 delta = df['Close'].diff()
                 gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
                 loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-                rs = gain / loss
-                rsi_degeri = 100 - (100 / (1 + rs)).iloc[-1]
-                st.info(f"📊 {h} RSI Değeri: {float(rsi_degeri):.2f}")
+                rsi_hesap = 100 - (100 / (1 + (gain / loss))).iloc[-1]
+                st.info(f"📊 {h} RSI Değeri: {float(rsi_hesap):.2f}")
                 fig, _ = mpf.plot(df.tail(60), type='candle', style='charles', returnfig=True)
                 st.pyplot(fig)
 
@@ -74,5 +73,29 @@ else:
             df = yf.download(h, period="1y", progress=False)
             if not df.empty:
                 if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
-                fiyat_güncel
-            
+                fiyat_güncel = float(df['Close'].iloc[-1])
+                ema20_hesap = df['Close'].ewm(span=20).mean().iloc[-1]
+                st.metric("Güncel Fiyat", f"{fiyat_güncel:.2f}")
+                st.metric("EMA 20 Hattı", f"{float(ema20_hesap):.2f}")
+
+    # --- TAB 4: ROD-BALANS ---
+    with tabs[3]:
+        st.subheader("v16.0: Rod-Balans (Destek/Direnç)")
+        hisse_160 = st.text_input("Analiz Edilecek Hisse:", "BIGEN", key="in160")
+        if st.button("SEVİYELERİ HESAPLA ⚖️", key="btn160"):
+            h = hisse_160.upper() + ".IS" if "." not in hisse_160 else hisse_160.upper()
+            df = yf.download(h, period="5d", progress=False)
+            if not df.empty and len(df) >= 2:
+                if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
+                last = df.iloc[-2]
+                hi, lo, cl = float(last['High']), float(last['Low']), float(last['Close'])
+                p = (hi + lo + cl) / 3
+                r1, s1 = (2 * p) - lo, (2 * p) - hi
+                r2, s2 = p + (hi - lo), p - (hi - lo)
+                st.markdown(f"### 📊 {h} Seviyeleri")
+                c1, c2, c3 = st.columns(3)
+                c1.metric("🚀 Direnç 2", f"{r2:.2f}")
+                c1.metric("📈 Direnç 1", f"{r1:.2f}")
+                c2.metric("⚖️ PİVOT", f"{p:.2f}")
+                c3.metric("📉 Destek 1", f"{s1:.2f}")
+                c3.metric("🚨 Destek 2", f"{s2:.2f}")
