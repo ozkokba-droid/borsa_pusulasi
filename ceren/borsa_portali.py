@@ -16,8 +16,8 @@ if not st.session_state["giris_basarili"]:
     st.markdown("<h1 style='text-align: center;'>🛡️ USTA TERMİNALİ GİRİŞ</h1>", unsafe_allow_html=True)
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
-        kullanici = st.text_input("Kullanıcı Adı:", key="user_in")
-        sifre = st.text_input("Şifre:", type="password", key="pass_in")
+        kullanici = st.text_input("Kullanıcı Adı:", key="u_in")
+        sifre = st.text_input("Şifre:", type="password", key="p_in")
         if st.button("Dükkanı Aç 🔑"):
             if kullanici == "usta" and sifre.lower() == "usta123":
                 st.session_state["giris_basarili"] = True
@@ -31,10 +31,9 @@ else:
         st.session_state["giris_basarili"] = False
         st.rerun()
 
-    st.title("🛰️ USTA BORSA PUSULASI v16.6")
+    st.title("🛰️ USTA BORSA PUSULASI v16.7")
     st.write("---")
 
-    # Sekmeleri oluşturuyoruz
     tabs = st.tabs(["🚀 v12.7 LİSTE", "🎯 v12.5 SİNYAL", "⚠️ v12.0 GÜVENLİK", "⚖️ v16.0 ROD-BALANS"])
 
     def terminal_calistir(func, input_val):
@@ -43,13 +42,13 @@ else:
             with redirect_stdout(f):
                 func()
         except Exception as e:
-            print(f"Hata: {e}")
+            print(f"Hata oluştu: {e}")
         return f.getvalue()
 
-    # --- TAB 1 ---
+    # --- TAB 1: LİSTE ---
     with tabs[0]:
         st.subheader("Dinamik Liste Tarama")
-        girdi_127 = st.text_input("Hisseler (virgülle ayır):", "THYAO, SASA, ASTOR", key="in127")
+        girdi_127 = st.text_input("Hisseler (örn: THYAO, SASA):", "THYAO, SASA, FROTO", key="in127")
         if st.button("TARAMAYI BAŞLAT 📡", key="btn127"):
             def func_127():
                 izleme = [h.strip().upper() for h in girdi_127.split(",") if h.strip()]
@@ -62,7 +61,7 @@ else:
                         print(f"{sembol:<10} | {f:>8.2f} | 🟢 ANALİZ TAMAM")
             st.code(terminal_calistir(func_127, girdi_127))
 
-    # --- TAB 2 ---
+    # --- TAB 2: SİNYAL ---
     with tabs[1]:
         st.subheader("Al-Sat Sinyal Kontrol")
         hisse_125 = st.text_input("Hisse Kodu:", "FROTO", key="in125")
@@ -72,10 +71,10 @@ else:
                 d = yf.download(h, period="6mo", progress=False)
                 if not d.empty:
                     f = d['Close'].iloc[-1].values[0] if isinstance(d['Close'], pd.DataFrame) else d['Close'].iloc[-1]
-                    print(f"🚀 {h} Analizi\nSon Fiyat: {f:.2f}\nDurum: Sinyal Bekleniyor...")
+                    print(f"🚀 {h} Analizi\nSon Fiyat: {f:.2f}\nDurum: Sinyal Güçlü")
             st.code(terminal_calistir(func_125, hisse_125))
 
-    # --- TAB 3 ---
+    # --- TAB 3: GÜVENLİK ---
     with tabs[2]:
         st.subheader("Güvenlik Sensörü")
         hisse_120 = st.text_input("Hisse Kodu:", "ASELS", key="in120")
@@ -85,10 +84,13 @@ else:
                 d = yf.download(h, period="1y", progress=False)
                 if not d.empty:
                     f = d['Close'].iloc[-1].values[0] if isinstance(d['Close'], pd.DataFrame) else d['Close'].iloc[-1]
-                    print(f"📊 {h} Raporu\nFiyat: {f:.2f}\nSürüş: Güvenli")
+                    print(f"📊 {h} Raporu\nFiyat: {f:.2f}\nSürüş: Güvenli Sürüş")
             st.code(terminal_calistir(func_120, hisse_120))
 
-    # --- TAB 4 ---
+    # --- TAB 4: ROD-BALANS ---
     with tabs[3]:
         st.subheader("Rod-Balans (Destek/Direnç)")
-        hisse_160 = st.text_input("Hisse Kodu:",
+        hisse_160 = st.text_input("Hisse Kodu:", "THYAO", key="in160")
+        if st.button("SEVİYELERİ HESAPLA ⚖️", key="btn160"):
+            def func_160():
+                h = hisse_160 + ".IS"
