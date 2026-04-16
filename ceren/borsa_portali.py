@@ -29,41 +29,37 @@ else:
         st.session_state["giris_basarili"] = False
         st.rerun()
 
-    st.title("🛰️ USTA BORSA PUSULASI v18.6")
+    st.title("🛰️ USTA BORSA PUSULASI v18.7")
     st.write("---")
     
-    # SEKMELERİ OLUŞTURUYORUZ
     tabs = st.tabs(["⚠️ v12.0 GÜVENLİK", "🎯 v12.5 AL-SAT", "🚀 v12.7 GARAJ", "💰 v13.3 KÂR", "⚙️ v12.1 ŞANZIMAN"])
 
     # --- TAB 1: v12.0 GÜVENLİK ---
     with tabs[0]:
         st.subheader("⚠️ v12.0: Güvenlik Paketi & Park Sensörü")
-        h120 = st.text_input("Hisse Sorgula (Örn: ASELS):", "ASELS", key="t120_new")
+        h120 = st.text_input("Hisse Sorgula (Örn: ASELS):", "ASELS", key="t120_v187")
         if st.button("SENSÖRÜ ÇALIŞTIR 🛡️"):
             f = io.StringIO()
             with redirect_stdout(f):
                 h = h120.strip().upper() + ".IS" if "." not in h120 else h120.upper()
-                d = yf.download(h, period="1y", progress=False)
-                if not d.empty:
-                    if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
-                    e20 = d['Close'].ewm(span=20).mean().iloc[-1]
-                    fiyat = d['Close'].iloc[-1]
-                    print(f"📊 {h} RAPORU:\n💰 Fiyat: {fiyat:.2f}\n🔹 EMA20: {e20:.2f}")
-                    if fiyat > e20: print("✅ DURUM: GÜVENLİ SÜRÜŞ.")
-                    else: print("🚨 TEHLİKE: ŞANZIMAN DAĞILDI!")
-                else: print("❌ Veri Hatası")
+                try:
+                    d = yf.download(h, period="1y", progress=False)
+                    if not d.empty:
+                        if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
+                        e20 = d['Close'].ewm(span=20).mean().iloc[-1]
+                        fiyat = d['Close'].iloc[-1]
+                        print(f"📊 {h} RAPORU:\n💰 Fiyat: {fiyat:.2f}\n🔹 EMA20: {e20:.2f}")
+                        if fiyat > e20: print("✅ DURUM: GÜVENLİ SÜRÜŞ. (Motor sesi sağlıklı.)")
+                        else: print("🚨 TEHLİKE: ŞANZIMAN DAĞILDI! (Kemerleri bağla.)")
+                    else: print("❌ Veri Hatası: Hisse bulunamadı.")
+                except Exception as e: print(f"❌ Hata: {str(e)}")
             st.code(f.getvalue())
 
     # --- TAB 2: v12.5 AL-SAT ---
     with tabs[1]:
         st.subheader("🎯 v12.5: Profesyonel Sinyal Onayı")
-        h125 = st.text_input("Hisse Sorgula (Örn: TOASO):", "TOASO", key="t125_new")
+        h125 = st.text_input("Hisse Sorgula (Örn: TOASO):", "TOASO", key="t125_v187")
         if st.button("SİNYALİ YAKALA 📡"):
             f = io.StringIO()
             with redirect_stdout(f):
-                h = h125.strip().upper() + ".IS" if "." not in h125 else h125.upper()
-                d = yf.download(h, period="6mo", progress=False)
-                if not d.empty:
-                    if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
-                    fiyat = d['Close'].iloc[-1]
-                    print(f"🚀 {h} İÇİN S
+                h = h125.strip().upper() + ".IS" if "." not in h
