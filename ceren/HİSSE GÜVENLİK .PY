@@ -1,70 +1,87 @@
+import streamlit as st
 import yfinance as yf
 import pandas as pd
-import matplotlib.pyplot as plt
-import mplfinance as mpf
 
-def pusula_pro_v12_0_guvenlik():
-    print("\n" + "="*85)
-    print(" 🎯 BORSA PUSULASI v12.0: GÜVENLİK PAKETİ & PARK SENSÖRÜ ")
-    print("="*85)
-    
-    hisse = input("Analiz Edilecek Hisse Kodu (Örn: ASELS): ").strip().upper()
-    if not "." in hisse: hisse += ".IS"
+# --- SAYFA AYARLARI ---
+st.set_page_config(page_title="Usta Borsa Pusulası Pro", layout="wide")
 
-    try:
-        data = yf.download(hisse, period="1y", interval="1d", progress=False)
-        if data.empty: return print("❌ Veri çekilemedi.")
+# --- GÜVENLİK KİLİDİ ---
+if "giris_basarili" not in st.session_state:
+    st.session_state["giris_basarili"] = False
 
-        data.columns = [col[0] if isinstance(col, tuple) else col for col in data.columns]
+if not st.session_state["giris_basarili"]:
+    st.markdown("<h1 style='text-align: center;'>🛡️ USTA TERMİNALİ GİRİŞ</h1>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        kullanici = st.text_input("Kullanıcı Adı:", key="u_in")
+        sifre = st.text_input("Şifre:", type="password", key="p_in")
+        if st.button("Dükkanı Aç 🔑"):
+            if kullanici == "usta" and sifre.lower() == "usta123":
+                st.session_state["giris_basarili"] = True
+                st.rerun()
+            else:
+                st.error("❌ Şifre yanlış usta!")
+else:
+    st.sidebar.success("✅ Yetki Onaylandı.")
+    if st.sidebar.button("Güvenli Çıkış"):
+        st.session_state["giris_basarili"] = False
+        st.rerun()
 
-        # --- TEKNİK HESAPLAMALAR ---
-        data['EMA20'] = data['Close'].ewm(span=20, adjust=False).mean()
-        data['SMA200'] = data['Close'].rolling(window=200).mean()
+    st.title("🛰️ USTA BORSA PUSULASI v16.9")
+    st.write("---")
+
+    tabs = st.tabs(["🚀 v12.7 LİSTE", "🎯 v12.5 SİNYAL", "⚠️ v12.0 GÜVENLİK", "⚖️ v16.0 ROD-BALANS"])
+
+    # --- TAB 4: ROD-BALANS (BURASI SENİN ÇALIŞMAYAN KISIM) ---
+    with tabs[3]:
+        st.subheader("Rod-Balans (Destek/Direnç)")
+        hisse_input = st.text_input("Analiz Edilecek Hisse:", "SASA", key="in160")
         
-        # RSI Hesabı
-        delta = data['Close'].diff()
-        gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-        loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-        rsi = 100 - (100 / (1 + (gain / loss).iloc[-1]))
-
-        fiyat = data['Close'].iloc[-1]
-        e20 = data['EMA20'].iloc[-1]
-        hacim_son = data['Volume'].iloc[-1]
-        hacim_ort = data['Volume'].tail(10).mean() # Son 10 günün hacim ortalaması
-
-        # --- GÜVENLİK SENSÖRLERİ (YENİ) ---
-        mesafe_e20 = ((fiyat - e20) / e20) * 100
-        hacim_dususu = hacim_son < hacim_ort # Hacim ortalamanın altındaysa yakıt bitiyor demektir.
-        
-        print(f"\n📊 {hisse} GÜVENLİK RAPORU:")
-        print("-" * 85)
-        print(f"💰 Fiyat: {fiyat:.2f} | 🌡️ RSI: {rsi:.2f} | ⛽ Hacim Gücü: {'ZAYIF' if hacim_dususu else 'GÜÇLÜ'}")
-        print("-" * 85)
-
-        # 1. BINADAN ÇAKILMA RİSKİ (TUZAK) SENSÖRÜ
-        if fiyat > e20 and hacim_dususu and rsi > 65:
-            print("🚨 TEHLİKE: BİNADAN ÇAKILMA RİSKİ! (Fiyat yükseliyor ama para girişi zayıf, RSI şişmiş.)")
-            print("   > Öneri: Kemerleri bağla, stop seviyeni çok yakın tut!")
-        
-        # 2. HEDEFE GELDİ / SAT SENSÖRÜ
-        elif rsi > 75:
-            print("⚠️ UYARI: DOYUM NOKTASI! (Motor aşırı ısındı, RSI 75 üstü.)")
-            print("   > Öneri: Buralar kâr realizasyonu için uygun olabilir, sağa çekip dinlen.")
+        if st.button("SEVİYELERİ HESAPLA ⚖️"):
+            h_kod = hisse_input.upper() + ".IS" if "." not in hisse_input else hisse_input.upper()
             
-        # 3. GÜVENLİ SÜRÜŞ SENSÖRÜ
-        elif fiyat > e20 and not hacim_dususu:
-            print("✅ DURUM: GÜVENLİ SÜRÜŞ. (Motor sesi sağlıklı, vites ileri.)")
-        
-        else:
-            print("⚖️ DURUM: BELİRSİZ / RÖLANTİ. (Trendin netleşmesini bekle.)")
+            with st.spinner('Veriler garajdan getiriliyor...'):
+                df = yf.download(h_kod, period="5d", progress=False)
+            
+            if not df.empty and len(df) >= 2:
+                # KRİTİK TAMİR: MultiIndex hatasını temizliyoruz
+                if isinstance(df.columns, pd.MultiIndex):
+                    df.columns = df.columns.get_level_values(0)
+                
+                # Verileri float tipine zorla (Gözükmeme sorununu çözer)
+                last_day = df.iloc[-2]
+                h = float(last_day['High'])
+                l = float(last_day['Low'])
+                c = float(last_day['Close'])
+                
+                # Pivot Hesaplamaları
+                pivot = (h + l + c) / 3
+                r1, s1 = (2 * pivot) - l, (2 * pivot) - h
+                r2, s2 = pivot + (h - l), pivot - (h - l)
+                
+                # SONUÇLARI GÖSTER
+                st.markdown(f"### 📊 {h_kod} Analiz Sonuçları")
+                
+                # Metrikleri büyük kutularda göster
+                m1, m2, m3 = st.columns(3)
+                m1.metric("🚀 Direnç 2 (Tavan)", f"{r2:.2f}")
+                m1.metric("📈 Direnç 1 (Üst)", f"{r1:.2f}")
+                
+                m2.subheader(f"⚖️ PİVOT: {pivot:.2f}")
+                m2.write("---")
+                m2.info(f"💰 Kapanış: {c:.2f}")
+                
+                m3.metric("📉 Destek 1 (Kriko)", f"{s1:.2f}")
+                m3.metric("🚨 Destek 2 (Dip)", f"{s2:.2f}")
+                
+                if c > pivot:
+                    st.success("🟢 Motor Sesi Sağlıklı: Fiyat Pivotun Üstünde!")
+                else:
+                    st.warning("🔴 Dikkat: Fiyat Pivotun Altında, Vitesi Küçült!")
+            else:
+                st.error("❌ Veri çekilemedi! İnterneti veya hisse kodunu kontrol et.")
 
-        print("-" * 85)
-        print(f"🔹 Mavi Çizgi (EMA 20) Desteği: {e20:.2f}")
-        print(f"📏 Destekle Mesafe: %{mesafe_e20:.2f}")
-        print("-" * 85)
-
-    except Exception as e:
-        print(f"❌ Hata: {e}")
-
-if __name__ == "__main__":
-    pusula_pro_v12_0_guvenlik()
+    # Diğer sekmeler (v16.8 ile aynı mantıkta sadeleşti)
+    with tabs[0]: st.write("Taramayı başlatmak için hisseleri gir usta.")
+    with tabs[1]: st.write("Hisse analiz grafiği burada görünecek.")
+    with tabs[2]: st.write("EMA20 güvenlik mesafesi ölçülecek.")
