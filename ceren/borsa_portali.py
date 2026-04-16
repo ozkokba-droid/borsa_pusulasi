@@ -29,39 +29,41 @@ else:
         st.session_state["giris_basarili"] = False
         st.rerun()
 
-    st.title("🛰️ USTA BORSA PUSULASI v18.5")
+    st.title("🛰️ USTA BORSA PUSULASI v18.6")
+    st.write("---")
     
+    # SEKMELERİ OLUŞTURUYORUZ
     tabs = st.tabs(["⚠️ v12.0 GÜVENLİK", "🎯 v12.5 AL-SAT", "🚀 v12.7 GARAJ", "💰 v13.3 KÂR", "⚙️ v12.1 ŞANZIMAN"])
 
-    # --- TAB 1: v12.0 GÜVENLİK (PARK SENSÖRÜ) ---
+    # --- TAB 1: v12.0 GÜVENLİK ---
     with tabs[0]:
         st.subheader("⚠️ v12.0: Güvenlik Paketi & Park Sensörü")
-        h120 = st.text_input("Hisse (Örn: ASELS):", "ASELS", key="t120")
-        if st.button("GÜVENLİK RAPORU AL 🛡️"):
+        h120 = st.text_input("Hisse Sorgula (Örn: ASELS):", "ASELS", key="t120_new")
+        if st.button("SENSÖRÜ ÇALIŞTIR 🛡️"):
             f = io.StringIO()
             with redirect_stdout(f):
                 h = h120.strip().upper() + ".IS" if "." not in h120 else h120.upper()
-                data = yf.download(h, period="1y", progress=False)
-                if not data.empty:
-                    if isinstance(data.columns, pd.MultiIndex): data.columns = data.columns.get_level_values(0)
-                    data['EMA20'] = data['Close'].ewm(span=20).mean()
-                    delta = data['Close'].diff(); gain = (delta.where(delta > 0, 0)).rolling(14).mean(); loss = (-delta.where(delta < 0, 0)).rolling(14).mean()
-                    rsi = 100 - (100 / (1 + (gain / loss).iloc[-1]))
-                    fiyat, e20 = data['Close'].iloc[-1], data['EMA20'].iloc[-1]
-                    h_son, h_ort = data['Volume'].iloc[-1], data['Volume'].tail(10).mean()
-                    print(f"📊 {h} RAPOR: Fiyat {fiyat:.2f} | RSI: {rsi:.2f} | Hacim: {'ZAYIF' if h_son < h_ort else 'GÜÇLÜ'}")
-                    if fiyat > e20 and h_son < h_ort and rsi > 65: print("🚨 TEHLİKE: BİNADAN ÇAKILMA RİSKİ!")
-                    elif rsi > 75: print("⚠️ UYARI: DOYUM NOKTASI (Motor Isındı!)")
-                    elif fiyat > e20: print("✅ DURUM: GÜVENLİ SÜRÜŞ.")
-                    else: print("⚖️ DURUM: BELİRSİZ / RÖLANTİ.")
+                d = yf.download(h, period="1y", progress=False)
+                if not d.empty:
+                    if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
+                    e20 = d['Close'].ewm(span=20).mean().iloc[-1]
+                    fiyat = d['Close'].iloc[-1]
+                    print(f"📊 {h} RAPORU:\n💰 Fiyat: {fiyat:.2f}\n🔹 EMA20: {e20:.2f}")
+                    if fiyat > e20: print("✅ DURUM: GÜVENLİ SÜRÜŞ.")
+                    else: print("🚨 TEHLİKE: ŞANZIMAN DAĞILDI!")
                 else: print("❌ Veri Hatası")
             st.code(f.getvalue())
 
-    # --- TAB 2: v12.5 AL-SAT SİNYAL ONAY ---
+    # --- TAB 2: v12.5 AL-SAT ---
     with tabs[1]:
         st.subheader("🎯 v12.5: Profesyonel Sinyal Onayı")
-        h125 = st.text_input("Hisse (Örn: TOASO):", "TOASO", key="t125")
-        if st.button("SİNYAL SORGULA 📡"):
+        h125 = st.text_input("Hisse Sorgula (Örn: TOASO):", "TOASO", key="t125_new")
+        if st.button("SİNYALİ YAKALA 📡"):
             f = io.StringIO()
             with redirect_stdout(f):
                 h = h125.strip().upper() + ".IS" if "." not in h125 else h125.upper()
+                d = yf.download(h, period="6mo", progress=False)
+                if not d.empty:
+                    if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
+                    fiyat = d['Close'].iloc[-1]
+                    print(f"🚀 {h} İÇİN S
