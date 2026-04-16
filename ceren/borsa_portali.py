@@ -31,7 +31,7 @@ else:
         st.rerun()
 
     st.sidebar.success("✅ Yetki Onaylandı. Hoş geldin Usta!")
-    st.title("🛰️ USTA BORSA PUSULASI: ÖZEL PANEL v16.2")
+    st.title("🛰️ USTA BORSA PUSULASI: ÖZEL PANEL v16.3")
     st.write("---")
 
     tab1, tab2, tab3, tab4 = st.tabs([
@@ -74,3 +74,43 @@ else:
 
     # --- SEKME 2: v12.5 ---
     with tab2:
+        st.header("v12.5: AL-SAT SİNYAL ONAY")
+        hisse_125 = st.text_input("Hisse Kodu:", "FROTO", key="k125")
+        if st.button("SİNYAL ONAYI AL 🎯"):
+            def func_125():
+                h = hisse_125 + ".IS" if "." not in hisse_125 else hisse_125
+                d = yf.download(h, period="6mo", progress=False)
+                if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
+                f = d['Close'].iloc[-1]
+                delta = d['Close'].diff()
+                gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+                loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+                rs = gain / loss
+                rsi = 100 - (100 / (1 + rs.iloc[-1]))
+                print(f"🚀 {h} ANALİZİ\nFiyat: {f:.2f}\nRSI: {rsi:.2f}\nSinyal: {'🟢 AL' if rsi < 70 else '🟠 DOYUM'}")
+                st.session_state['d125'] = d
+            st.code(terminal_calistir(func_125, hisse_125), language='text')
+            if 'd125' in st.session_state:
+                fig, _ = mpf.plot(st.session_state['d125'].tail(60), type='candle', style='charles', returnfig=True)
+                st.pyplot(fig)
+
+    # --- SEKME 3: v12.0 ---
+    with tab3:
+        st.header("v12.0: GÜVENLİK SENSÖRÜ")
+        hisse_120 = st.text_input("Hisse Kodu:", "ASELS", key="k120")
+        if st.button("GÜVENLİK RAPORU AL 🛡️"):
+            def func_120():
+                h = hisse_120 + ".IS" if "." not in hisse_120 else hisse_120
+                d = yf.download(h, period="1y", progress=False)
+                if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
+                f = d['Close'].iloc[-1]; e20 = d['Close'].ewm(span=20).mean().iloc[-1]
+                print(f"📊 {h} RAPORU\nDurum: {'✅ GÜVENLİ' if f > e20 else '🚨 RİSKLİ'}\nMesafe: %{((f-e20)/e20*100):.2f}")
+            st.code(terminal_calistir(func_120, hisse_120), language='text')
+
+    # --- SEKME 4: v16.0 ROD-BALANS ---
+    with tab4:
+        st.header("v16.0: DESTEK & DİRENÇ ANALİZİ")
+        hisse_160 = st.text_input("Analiz Edilecek Makine:", "THYAO", key="k160")
+        if st.button("SEVİYELERİ HESAPLA ⚖️"):
+            def func_160():
+                h = hisse_160 + ".IS" if "." not in hisse_160 else hisse
