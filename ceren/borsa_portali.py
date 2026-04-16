@@ -28,7 +28,7 @@ else:
         st.session_state["giris_basarili"] = False
         st.rerun()
 
-    st.title("🛰️ USTA BORSA PUSULASI v17.1")
+    st.title("🛰️ USTA BORSA PUSULASI v17.2")
     st.write("---")
 
     tabs = st.tabs(["🚀 v12.7 LİSTE", "🎯 v12.5 SİNYAL", "⚠️ v12.0 GÜVENLİK", "⚖️ v16.0 ROD-BALANS"])
@@ -59,7 +59,8 @@ else:
                 delta = df['Close'].diff()
                 gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
                 loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-                rsi = 100 - (100 / (1 + (gain / loss))).iloc[-1]
+                rs = gain / loss
+                rsi = 100 - (100 / (1 + rs)).iloc[-1]
                 st.info(f"📊 {h} RSI Değeri: {float(rsi):.2f}")
                 fig, _ = mpf.plot(df.tail(60), type='candle', style='charles', returnfig=True)
                 st.pyplot(fig)
@@ -73,24 +74,4 @@ else:
             df = yf.download(h, period="1y", progress=False)
             if not df.empty:
                 if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
-                fiyat = float(df['Close'].iloc[-1])
-                ema20 = df['Close'].ewm(span=20).mean().iloc[-1]
-                st.metric("Güncel Fiyat", f"{fiyat:.2f}")
-                st.metric("EMA 20 Hattı", f"{float(ema20):.2f}")
-
-    # --- TAB 4: ROD-BALANS (D/D) ---
-    with tabs[3]:
-        st.subheader("v16.0: Rod-Balans (Destek/Direnç)")
-        hisse_160 = st.text_input("Hisse:", "SASA", key="in160")
-        if st.button("SEVİYELERİ HESAPLA ⚖️", key="btn160"):
-            h = hisse_160.upper() + ".IS" if "." not in hisse_160 else hisse_160.upper()
-            df = yf.download(h, period="5d", progress=False)
-            if not df.empty and len(df) >= 2:
-                if isinstance(df.columns, pd.MultiIndex): df.columns = df.columns.get_level_values(0)
-                last = df.iloc[-2]
-                hi, lo, cl = float(last['High']), float(last['Low']), float(last['Close'])
-                p = (hi + lo + cl) / 3
-                r1, s1 = (2 * p) - lo, (2 * p) - hi
-                r2, s2 = p + (hi - lo), p - (hi - lo)
-                st.markdown(f"### 📊 {h} Analiz")
-                col1, col2, col3 = st.columns(3
+                f
