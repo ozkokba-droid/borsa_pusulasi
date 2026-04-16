@@ -31,7 +31,7 @@ else:
         st.rerun()
 
     st.sidebar.success("✅ Yetki Onaylandı. Hoş geldin Usta!")
-    st.title("🛰️ USTA BORSA PUSULASI: ÖZEL PANEL v16.4")
+    st.title("🛰️ USTA BORSA PUSULASI: ÖZEL PANEL v16.5")
     st.write("---")
 
     tab1, tab2, tab3, tab4 = st.tabs([
@@ -85,8 +85,8 @@ else:
                 delta = d['Close'].diff()
                 gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
                 loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-                rsi = 100 - (100 / (1 + (gain / loss))).iloc[-1]
-                print(f"🚀 {h} ANALİZİ\nFiyat: {f:.2f}\nRSI: {rsi:.2f}\nSinyal: {'🟢 AL' if rsi < 70 else '🟠 DOYUM'}")
+                rsi_val = 100 - (100 / (1 + (gain / loss))).iloc[-1]
+                print(f"🚀 {h} ANALİZİ\nFiyat: {f:.2f}\nRSI: {rsi_val:.2f}\nSinyal: {'🟢 AL' if rsi_val < 70 else '🟠 DOYUM'}")
                 st.session_state['d125'] = d
             st.code(terminal_calistir(func_125, hisse_125), language='text')
             if 'd125' in st.session_state:
@@ -98,3 +98,12 @@ else:
         st.header("v12.0: GÜVENLİK SENSÖRÜ")
         hisse_120 = st.text_input("Hisse Kodu:", "ASELS", key="k120")
         if st.button("GÜVENLİK RAPORU AL 🛡️", key="b120"):
+            def func_120():
+                h = hisse_120 + ".IS" if "." not in hisse_120 else hisse_120
+                d = yf.download(h, period="1y", progress=False)
+                if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
+                f = d['Close'].iloc[-1]; e20 = d['Close'].ewm(span=20).mean().iloc[-1]
+                print(f"📊 {h} RAPORU\nDurum: {'✅ GÜVENLİ' if f > e20 else '🚨 RİSKLİ'}\nMesafe: %{((f-e20)/e20*100):.2f}")
+            st.code(terminal_calistir(func_120, hisse_120), language='text')
+
+    # --- SEKME
