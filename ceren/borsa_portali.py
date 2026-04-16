@@ -25,13 +25,13 @@ if not st.session_state["giris_basarili"]:
             else:
                 st.error("❌ Yetkisiz Giriş! Şifreyi doğru gir usta.")
 else:
-    # --- BURASI ANA PANEL ---
+    # --- ANA PANEL ---
     if st.sidebar.button("Güvenli Çıkış"):
         st.session_state["giris_basarili"] = False
         st.rerun()
 
     st.sidebar.success("✅ Yetki Onaylandı. Hoş geldin Usta!")
-    st.title("🛰️ USTA BORSA PUSULASI: ÖZEL PANEL v16.0")
+    st.title("🛰️ USTA BORSA PUSULASI: ÖZEL PANEL v16.1")
     st.write("---")
 
     tab1, tab2, tab3, tab4 = st.tabs([
@@ -68,7 +68,7 @@ else:
                         f = d['Close'].iloc[-1]; e20 = d['Close'].ewm(span=20).mean().iloc[-1]
                         h_gucu = (d['Volume'].iloc[-1] / d['Volume'].tail(10).mean()) * 100
                         durum = "🟢 GÜÇLÜ AL" if f > e20 and h_gucu > 120 else "🔴 BEKLE"
-                        print(f"{sembol:<10} | {f:>8.2f} | %{h_gucu:>8.0f} | {durum}")
+                        print(f"{sembol:<10} | {f:>8.2f} | %{h_gucu:>10.0f} | {durum}")
                     except: continue
             st.code(terminal_calistir(func_127, girdi_127), language='text')
 
@@ -103,32 +103,10 @@ else:
                 print(f"📊 {h} RAPORU\nDurum: {'✅ GÜVENLİ' if f > e20 else '🚨 RİSKLİ'}\nMesafe: %{((f-e20)/e20*100):.2f}")
             st.code(terminal_calistir(func_120, hisse_120), language='text')
 
-    # --- SEKME 4: v16.0 ROD-BALANS (DESTEK/DİRENÇ) ---
+    # --- SEKME 4: v16.0 ROD-BALANS ---
     with tab4:
         st.header("v16.0: DESTEK & DİRENÇ ANALİZİ")
         hisse_160 = st.text_input("Analiz Edilecek Makine (Örn: THYAO):", "THYAO", key="k160")
         if st.button("SEVİYELERİ HESAPLA ⚖️"):
             def func_160():
-                h = hisse_160 + ".IS" if "." not in hisse_160 else hisse_160
-                d = yf.download(h, period="5d", interval="1d", progress=False)
-                if len(d) < 2: 
-                    print("❌ Veri eksik!")
-                    return
-                if isinstance(d.columns, pd.MultiIndex): d.columns = d.columns.get_level_values(0)
-                last_day = d.iloc[-2] # Bir önceki tam kapanış
-                y, du, k = last_day['High'], last_day['Low'], last_day['Close']
-                p = (y + du + k) / 3
-                r1, s1 = (2 * p) - du, (2 * p) - y
-                r2, s2 = p + (y - du), p - (y - du)
-                
-                print(f"📊 {h} İÇİN ROD-BALANS AYARI:\n" + "-"*45)
-                print(f"🚀 Direnç 2 (Tavan):     {r2:>8.2f}")
-                print(f"📈 Direnç 1 (Üst Eşik):  {r1:>8.2f}")
-                print(f"⚖️ PİVOT (Rölanti):      {p:>8.2f}")
-                print(f"📉 Destek 1 (Kriko):     {s1:>8.2f}")
-                print(f"🚨 Destek 2 (Dip):       {s2:>8.2f}")
-                print("-" * 45)
-                print("💡 Usta Notu: Pivot üstündeysen gazla, altındaysan vitesi boşa al!")
-            st.code(terminal_calistir(func_120, hisse_160), language='text')
-            # func_120 yazmışım, hemen func_160 yapalım:
-            st.code(terminal_calistir(func_160, hisse_160), language='text')
+                h = hisse_160 + ".IS" if "." not in hisse_
